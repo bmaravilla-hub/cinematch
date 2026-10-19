@@ -1,0 +1,77 @@
+.cm-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.cm-tabs-underline {
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.cm-tabs-underline .cm-tab-btn {
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  position: relative;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color var(--transition-fast);
+}
+
+.cm-tabs-underline .cm-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.cm-tabs-underline .cm-tab-btn.active {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.cm-tabs-underline .cm-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--brand-primary);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.8);
+}
+
+.cm-tabs-pills {
+  background: var(--bg-surface);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+}
+
+.cm-tabs-pills .cm-tab-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.cm-tabs-pills .cm-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.cm-tabs-pills .cm-tab-btn.active {
+  background: var(--brand-primary);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.cm-tab-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
