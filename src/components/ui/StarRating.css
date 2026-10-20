@@ -1,0 +1,32 @@
+.cm-star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.cm-star-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  cursor: default;
+  transition: transform var(--transition-fast);
+}
+
+.cm-star-rating.interactive .cm-star-btn {
+  cursor: pointer;
+}
+
+.cm-star-rating.interactive .cm-star-btn:hover {
+  transform: scale(1.2);
+}
+
+.cm-star-icon {
+  transition: all var(--transition-fast);
+}
+
+.cm-star-icon.filled {
+  filter: drop-shadow(0 0 6px rgba(244, 114, 182, 0.4));
+}

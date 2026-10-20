@@ -1,0 +1,40 @@
+.cm-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  gap: var(--space-md);
+}
+
+.cm-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cm-section-title-accent {
+  color: var(--brand-primary);
+}
+
+.cm-section-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.cm-section-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition-fast);
+}
+
+.cm-section-action:hover {
+  color: #FFFFFF;
+}
