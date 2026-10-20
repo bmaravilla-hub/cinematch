@@ -1,0 +1,225 @@
+.cm-catalog-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.cm-catalog-layout {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+}
+
+.cm-catalog-sidebar {
+  width: 220px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  flex-shrink: 0;
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-md));
+}
+
+.cm-catalog-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--space-sm);
+}
+
+.cm-filter-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cm-filter-reset-link {
+  font-size: 11px;
+  color: var(--brand-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition-fast);
+}
+
+.cm-filter-reset-link:hover {
+  color: #FFFFFF;
+}
+
+.cm-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.cm-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--brand-secondary);
+}
+
+.cm-genre-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cm-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.cm-checkbox-item:hover {
+  color: var(--text-main);
+}
+
+.cm-checkbox-item input[type='checkbox'] {
+  accent-color: var(--brand-primary);
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cm-year-range-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.cm-year-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cm-range-slider {
+  width: 100%;
+  accent-color: var(--brand-primary);
+  cursor: pointer;
+}
+
+.cm-rating-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cm-rating-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cm-rating-chip:hover {
+  border-color: var(--brand-secondary);
+  color: var(--text-main);
+}
+
+.cm-rating-chip.active {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+}
+
+.cm-catalog-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  min-width: 0;
+}
+
+.cm-catalog-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.cm-catalog-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.cm-catalog-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cm-catalog-heading {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.cm-catalog-query-desc {
+  font-size: 14px;
+  color: var(--brand-secondary);
+}
+
+.cm-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .cm-catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .cm-catalog-layout {
+    flex-direction: column;
+  }
+
+  .cm-catalog-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .cm-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .cm-catalog-grid {
+    grid-template-columns: 1fr;
+  }
+}
