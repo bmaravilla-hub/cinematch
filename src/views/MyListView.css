@@ -1,0 +1,57 @@
+.cm-mylist-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.cm-mylist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cm-mylist-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cm-mylist-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.cm-mylist-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.cm-mylist-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .cm-mylist-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .cm-mylist-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .cm-mylist-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
