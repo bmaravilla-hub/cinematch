@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Play, Bookmark, BookmarkCheck, ArrowLeft, Star, Film, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Bookmark, BookmarkCheck, ArrowLeft, Star, Film, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useCineMatch } from '../hooks/useCineMatch';
 import { Button } from '../components/ui/Button';
 import { StarRating } from '../components/ui/StarRating';
@@ -10,6 +10,7 @@ import './MovieDetailView.css';
 export const MovieDetailView: React.FC = () => {
   const {
     selectedMovie,
+    user,
     toggleMyList,
     isInMyList,
     rateMovie,
@@ -26,7 +27,16 @@ export const MovieDetailView: React.FC = () => {
   const [userReview, setUserReview] = useState<string>(() => {
     return getMovieRating(selectedMovie?.id || '')?.review || '';
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Sincronizar el formulario cuando cambie la película o las calificaciones del backend
+  useEffect(() => {
+    const existing = ratings.find((r) => r.movieId === selectedMovie?.id && r.userId === user.id);
+    setUserScore(existing?.score || 5);
+    setUserReview(existing?.review || '');
+  }, [selectedMovie?.id, ratings, user.id]);
 
   if (!selectedMovie) {
     return (
@@ -42,11 +52,22 @@ export const MovieDetailView: React.FC = () => {
   const inList = isInMyList(selectedMovie.id);
   const movieRatings = ratings.filter((r) => r.movieId === selectedMovie.id);
 
-  const handleSaveRating = (e: React.FormEvent) => {
+  const handleSaveRating = async (e: React.FormEvent) => {
     e.preventDefault();
-    rateMovie(selectedMovie.id, userScore, userReview);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2500);
+    setIsSubmitting(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    try {
+      await rateMovie(selectedMovie.id, userScore, userReview);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err: any) {
+      setSaveError(err.message || 'No fue posible registrar la calificación en el backend');
+      setTimeout(() => setSaveError(null), 4000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const tabs = [
@@ -244,14 +265,33 @@ export const MovieDetailView: React.FC = () => {
               />
             </div>
 
-            <Button variant="primary" type="submit" icon={<Star size={16} fill="#FFFFFF" />}>
-              Guardar calificación
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isSubmitting}
+              icon={<Star size={16} fill="#FFFFFF" />}
+            >
+              {isSubmitting ? 'Guardando en servidor...' : 'Guardar calificación'}
             </Button>
 
             {saveSuccess && (
               <div className="cm-rating-success-message">
                 <CheckCircle2 size={16} color="var(--brand-secondary)" />
-                <span>¡Calificación guardada con éxito!</span>
+                <span>¡Calificación registrada y persistida con éxito!</span>
+              </div>
+            )}
+
+            {saveError && (
+              <div
+                className="cm-rating-success-message"
+                style={{
+                  borderColor: 'rgba(239, 68, 68, 0.4)',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444'
+                }}
+              >
+                <AlertCircle size={16} color="#ef4444" />
+                <span>{saveError}</span>
               </div>
             )}
           </form>

@@ -5,7 +5,7 @@ import { SearchInput } from '../ui/SearchInput';
 import './Topbar.css';
 
 export const Topbar: React.FC = () => {
-  const { user, filters, setCatalogFilters, navigate, activeView } = useCineMatch();
+  const { user, filters, setCatalogFilters, navigate, activeView, isBackendConnected, refreshData } = useCineMatch();
 
   const handleSearchChange = (query: string) => {
     setCatalogFilters({ query });
@@ -25,6 +25,23 @@ export const Topbar: React.FC = () => {
       </div>
 
       <div className="cm-topbar-actions">
+        <div
+          className={`cm-topbar-status ${isBackendConnected ? 'is-online' : 'is-offline'}`}
+          title={
+            isBackendConnected
+              ? 'Backend sincronizado y en línea'
+              : 'Servidor desconectado. Mostrando datos locales de muestra. Clic para reintentar conexión.'
+          }
+          onClick={!isBackendConnected ? () => refreshData() : undefined}
+          role={!isBackendConnected ? 'button' : undefined}
+          tabIndex={!isBackendConnected ? 0 : undefined}
+        >
+          <span className={`cm-status-indicator-dot ${isBackendConnected ? 'dot-online' : 'dot-offline'}`} />
+          <span className="cm-status-indicator-text">
+            {isBackendConnected ? 'En línea' : 'Sin conexión'}
+          </span>
+        </div>
+
         <button
           type="button"
           className="cm-topbar-btn"

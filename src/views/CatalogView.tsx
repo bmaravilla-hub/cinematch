@@ -19,7 +19,7 @@ const GENRE_LIST = [
 ];
 
 export const CatalogView: React.FC = () => {
-  const { movies, filters, setCatalogFilters, clearFilters } = useCineMatch();
+  const { movies, filters, setCatalogFilters, clearFilters, isSampleData } = useCineMatch();
 
   const filteredMovies = useMemo(() => {
     return movies.filter((movie) => {
@@ -174,9 +174,26 @@ export const CatalogView: React.FC = () => {
               onChange={(tabId) => setCatalogFilters({ type: tabId as any })}
               variant="pills"
             />
-            <span className="cm-catalog-count">
-              {filteredMovies.length} {filteredMovies.length === 1 ? 'resultado' : 'resultados'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {isSampleData && (
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-muted)',
+                    backgroundColor: 'rgba(234, 179, 8, 0.08)',
+                    border: '1px solid rgba(234, 179, 8, 0.2)',
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-full)'
+                  }}
+                  title="El catálogo muestra los datos base de muestra porque el backend está desconectado"
+                >
+                  Datos de muestra
+                </span>
+              )}
+              <span className="cm-catalog-count">
+                {filteredMovies.length} {filteredMovies.length === 1 ? 'resultado' : 'resultados'}
+              </span>
+            </div>
           </div>
 
           <div className="cm-catalog-header-text">

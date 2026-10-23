@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import type { ActiveView, CatalogFilters, Movie, Rating, User, UserPreferences } from '../types';
 import { initialMovies } from '../data/movies';
 import { initialUser } from '../data/users';
-import { initialRatings } from '../data/ratings';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { apiService } from '../services/api';
 
 interface CineMatchContextType {
   activeView: ActiveView;
@@ -15,15 +15,20 @@ interface CineMatchContextType {
   ratings: Rating[];
   preferences: UserPreferences;
   filters: CatalogFilters;
+  isLoadingData: boolean;
+  serverError: string | null;
+  isBackendConnected: boolean;
+  isSampleData: boolean;
   navigate: (view: ActiveView) => void;
   selectMovie: (movieId: string) => void;
   toggleMyList: (movieId: string) => void;
   isInMyList: (movieId: string) => boolean;
-  rateMovie: (movieId: string, score: number, review?: string) => void;
+  rateMovie: (movieId: string, score: number, review?: string) => Promise<boolean>;
   getMovieRating: (movieId: string) => Rating | undefined;
   updatePreferences: (prefs: Partial<UserPreferences>) => void;
   setCatalogFilters: (filters: Partial<CatalogFilters>) => void;
   clearFilters: () => void;
+  refreshData: () => Promise<void>;
 }
 
 const defaultFilters: CatalogFilters = {
@@ -40,10 +45,15 @@ const CineMatchContext = createContext<CineMatchContextType | undefined>(undefin
 export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<ActiveView>('home');
   const [selectedMovieId, setSelectedMovieId] = useState<string | null>('m101');
-  const [movies] = useState<Movie[]>(initialMovies);
+
+  const [movies, setMovies] = useState<Movie[]>(initialMovies);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
+  const [isSampleData, setIsSampleData] = useState<boolean>(true);
 
   const [myList, setMyList] = useLocalStorage<string[]>('cinematch_my_list', initialUser.myListMovieIds);
-  const [ratings, setRatings] = useLocalStorage<Rating[]>('cinematch_ratings', initialRatings);
   const [preferences, setPreferences] = useLocalStorage<UserPreferences>('cinematch_preferences', initialUser.preferences);
 
   const [filters, setFilters] = useState<CatalogFilters>(defaultFilters);
@@ -53,6 +63,35 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     myListMovieIds: myList,
     preferences
   }), [myList, preferences]);
+
+  const refreshData = useCallback(async () => {
+    setIsLoadingData(true);
+    setServerError(null);
+
+    try {
+      const [fetchedMovies, fetchedRatings] = await Promise.all([
+        apiService.getMovies(),
+        apiService.getUserRatings(user.id)
+      ]);
+
+      setMovies(fetchedMovies);
+      setRatings(fetchedRatings);
+      setIsBackendConnected(true);
+      setIsSampleData(false);
+      setServerError(null);
+    } catch (err: any) {
+      console.warn('[CineMatchContext] No se pudo sincronizar con el backend:', err.message);
+      setIsBackendConnected(false);
+      setIsSampleData(true);
+      setServerError('Servidor backend desconectado (http://localhost:3001). Mostrando datos locales de muestra.');
+    } finally {
+      setIsLoadingData(false);
+    }
+  }, [user.id]);
+
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   const selectedMovie = useMemo(() => {
     if (!selectedMovieId) return movies[0] || null;
@@ -70,7 +109,7 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const toggleMyList = (movieId: string) => {
-    setMyList(prev => 
+    setMyList(prev =>
       prev.includes(movieId) ? prev.filter(id => id !== movieId) : [...prev, movieId]
     );
   };
@@ -79,25 +118,31 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return myList.includes(movieId);
   };
 
-  const rateMovie = (movieId: string, score: number, review?: string) => {
+
+  const rateMovie = async (movieId: string, score: number, review?: string): Promise<boolean> => {
+    const result = await apiService.postRating(user.id, movieId, score, review);
+    if (!result || !result.rating) {
+      throw new Error('El servidor no retornó confirmación válida de la calificación');
+    }
+
     setRatings(prev => {
       const existingIndex = prev.findIndex(r => r.movieId === movieId && r.userId === user.id);
-      const newRating: Rating = {
-        id: existingIndex >= 0 ? prev[existingIndex].id : `r${Date.now()}`,
-        userId: user.id,
-        movieId,
-        score,
-        createdAt: new Date().toISOString().split('T')[0],
-        review: review || (existingIndex >= 0 ? prev[existingIndex].review : undefined)
-      };
-
       if (existingIndex >= 0) {
         const next = [...prev];
-        next[existingIndex] = newRating;
+        next[existingIndex] = result.rating;
         return next;
       }
-      return [newRating, ...prev];
+      return [result.rating, ...prev];
     });
+
+    if (result.updatedMovie) {
+      const updated = result.updatedMovie;
+      setMovies(prev =>
+        prev.map(m => (m.id === updated.id ? { ...m, rating: updated.rating, ratingCount: updated.ratingCount } : m))
+      );
+    }
+
+    return true;
   };
 
   const getMovieRating = (movieId: string) => {
@@ -134,6 +179,10 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ratings,
         preferences,
         filters,
+        isLoadingData,
+        serverError,
+        isBackendConnected,
+        isSampleData,
         navigate,
         selectMovie,
         toggleMyList,
@@ -142,7 +191,8 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         getMovieRating,
         updatePreferences,
         setCatalogFilters,
-        clearFilters
+        clearFilters,
+        refreshData
       }}
     >
       {children}
