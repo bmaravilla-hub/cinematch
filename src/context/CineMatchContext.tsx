@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
-import type { ActiveView, CatalogFilters, Movie, Rating, User, UserPreferences } from '../types';
+import type { ActiveView, CatalogFilters, Movie, Rating, User, UserPreferences, CreateUserDTO } from '../types';
 import { initialMovies } from '../data/movies';
 import { initialUser } from '../data/users';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -11,6 +11,7 @@ interface CineMatchContextType {
   selectedMovie: Movie | null;
   movies: Movie[];
   user: User;
+  allUsers: User[];
   myList: string[];
   ratings: Rating[];
   preferences: UserPreferences;
@@ -19,6 +20,8 @@ interface CineMatchContextType {
   serverError: string | null;
   isBackendConnected: boolean;
   isSampleData: boolean;
+  isRegisterModalOpen: boolean;
+  setIsRegisterModalOpen: (open: boolean) => void;
   navigate: (view: ActiveView) => void;
   selectMovie: (movieId: string) => void;
   toggleMyList: (movieId: string) => void;
@@ -29,6 +32,8 @@ interface CineMatchContextType {
   setCatalogFilters: (filters: Partial<CatalogFilters>) => void;
   clearFilters: () => void;
   refreshData: () => Promise<void>;
+  registerUser: (dto: CreateUserDTO) => Promise<User>;
+  switchUser: (userId: string) => Promise<void>;
 }
 
 const defaultFilters: CatalogFilters = {
@@ -46,6 +51,10 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [activeView, setActiveView] = useState<ActiveView>('home');
   const [selectedMovieId, setSelectedMovieId] = useState<string | null>('m101');
 
+  const [currentUserId, setCurrentUserId] = useLocalStorage<string>('cinematch_current_user_id', 'u001');
+  const [allUsers, setAllUsers] = useState<User[]>([initialUser]);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+
   const [movies, setMovies] = useState<Movie[]>(initialMovies);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -58,24 +67,41 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [filters, setFilters] = useState<CatalogFilters>(defaultFilters);
 
-  const user: User = useMemo(() => ({
-    ...initialUser,
-    myListMovieIds: myList,
-    preferences
-  }), [myList, preferences]);
+  const user: User = useMemo(() => {
+    const found = allUsers.find(u => u.id === currentUserId);
+    if (found) {
+      return {
+        ...found,
+        myListMovieIds: myList,
+        preferences
+      };
+    }
+    return {
+      ...initialUser,
+      id: currentUserId,
+      myListMovieIds: myList,
+      preferences
+    };
+  }, [allUsers, currentUserId, myList, preferences]);
 
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (targetUserId?: string) => {
     setIsLoadingData(true);
     setServerError(null);
 
+    const activeId = targetUserId || currentUserId;
+
     try {
-      const [fetchedMovies, fetchedRatings] = await Promise.all([
+      const [fetchedMovies, fetchedRatings, fetchedUsers] = await Promise.all([
         apiService.getMovies(),
-        apiService.getUserRatings(user.id)
+        apiService.getUserRatings(activeId).catch(() => []),
+        apiService.getUsers().catch(() => [initialUser])
       ]);
 
       setMovies(fetchedMovies);
       setRatings(fetchedRatings);
+      if (fetchedUsers && fetchedUsers.length > 0) {
+        setAllUsers(fetchedUsers);
+      }
       setIsBackendConnected(true);
       setIsSampleData(false);
       setServerError(null);
@@ -87,11 +113,24 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     } finally {
       setIsLoadingData(false);
     }
-  }, [user.id]);
+  }, [currentUserId]);
 
   useEffect(() => {
     refreshData();
   }, [refreshData]);
+
+  const registerUser = async (dto: CreateUserDTO): Promise<User> => {
+    const created = await apiService.registerUser(dto);
+    setAllUsers(prev => [...prev.filter(u => u.id !== created.id), created]);
+    setCurrentUserId(created.id);
+    await refreshData(created.id);
+    return created;
+  };
+
+  const switchUser = async (newUserId: string) => {
+    setCurrentUserId(newUserId);
+    await refreshData(newUserId);
+  };
 
   const selectedMovie = useMemo(() => {
     if (!selectedMovieId) return movies[0] || null;
@@ -175,6 +214,7 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         selectedMovie,
         movies,
         user,
+        allUsers,
         myList,
         ratings,
         preferences,
@@ -183,6 +223,8 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         serverError,
         isBackendConnected,
         isSampleData,
+        isRegisterModalOpen,
+        setIsRegisterModalOpen,
         navigate,
         selectMovie,
         toggleMyList,
@@ -192,7 +234,9 @@ export const CineMatchProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updatePreferences,
         setCatalogFilters,
         clearFilters,
-        refreshData
+        refreshData,
+        registerUser,
+        switchUser
       }}
     >
       {children}

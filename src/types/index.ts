@@ -33,6 +33,13 @@ export interface User {
   preferences: UserPreferences;
 }
 
+export interface CreateUserDTO {
+  id?: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+}
+
 export interface Rating {
   id: string;
   userId: string;

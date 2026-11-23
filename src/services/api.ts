@@ -1,4 +1,4 @@
-import type { Movie, Rating } from '../types';
+import type { Movie, Rating, User, CreateUserDTO } from '../types';
 
 const API_BASE_URL = '/api';
 
@@ -94,5 +94,37 @@ export const apiService = {
     }
     const json = await response.json();
     return json.data || [];
+  },
+
+  /**
+   * Obtiene todos los usuarios registrados en el backend.
+   */
+  async getUsers(): Promise<User[]> {
+    const response = await fetch(`${API_BASE_URL}/users`);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Error al consultar usuarios (${response.status})`);
+    }
+    const json = await response.json();
+    return json.data || [];
+  },
+
+  /**
+   * Registra un nuevo usuario en el backend para integrarlo al motor de recomendación.
+   */
+  async registerUser(dto: CreateUserDTO): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || `Error al registrar usuario (${response.status})`);
+    }
+
+    const json = await response.json();
+    return json.data;
   }
 };
