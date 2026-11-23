@@ -142,3 +142,41 @@
     display: none;
   }
 }
+
+.cm-topbar-register-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(244, 114, 182, 0.2) 100%);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: var(--text-main, #E5E7EB);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cm-topbar-register-btn:hover {
+  background: var(--btn-gradient);
+  border-color: transparent;
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
+}
+
+.cm-topbar-user-select {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-main);
+  padding: 5px 10px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.cm-topbar-user-select:focus {
+  border-color: var(--brand-primary);
+}

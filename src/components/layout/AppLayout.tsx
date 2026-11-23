@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { RegisterUserModal } from '../ui/RegisterUserModal';
 import './AppLayout.css';
 
 export interface AppLayoutProps {
@@ -15,6 +16,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <Topbar />
         <main className="cm-view-container">{children}</main>
       </div>
+      <RegisterUserModal />
     </div>
   );
 };

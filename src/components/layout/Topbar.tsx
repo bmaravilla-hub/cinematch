@@ -1,11 +1,22 @@
 import React from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, UserPlus } from 'lucide-react';
 import { useCineMatch } from '../../hooks/useCineMatch';
 import { SearchInput } from '../ui/SearchInput';
 import './Topbar.css';
 
 export const Topbar: React.FC = () => {
-  const { user, filters, setCatalogFilters, navigate, activeView, isBackendConnected, refreshData } = useCineMatch();
+  const {
+    user,
+    allUsers,
+    switchUser,
+    setIsRegisterModalOpen,
+    filters,
+    setCatalogFilters,
+    navigate,
+    activeView,
+    isBackendConnected,
+    refreshData
+  } = useCineMatch();
 
   const handleSearchChange = (query: string) => {
     setCatalogFilters({ query });
@@ -25,6 +36,31 @@ export const Topbar: React.FC = () => {
       </div>
 
       <div className="cm-topbar-actions">
+        {allUsers.length > 1 && (
+          <select
+            className="cm-topbar-user-select"
+            value={user.id}
+            onChange={(e) => switchUser(e.target.value)}
+            title="Cambiar usuario activo (para pruebas de recomendación)"
+          >
+            {allUsers.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name} ({u.id})
+              </option>
+            ))}
+          </select>
+        )}
+
+        <button
+          type="button"
+          className="cm-topbar-register-btn"
+          title="Registrar nuevo usuario en el sistema"
+          onClick={() => setIsRegisterModalOpen(true)}
+        >
+          <UserPlus size={15} />
+          <span>Registrar</span>
+        </button>
+
         <div
           className={`cm-topbar-status ${isBackendConnected ? 'is-online' : 'is-offline'}`}
           title={
