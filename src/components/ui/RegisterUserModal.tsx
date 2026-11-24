@@ -9,7 +9,6 @@ export const RegisterUserModal: React.FC = () => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [customId, setCustomId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -36,14 +35,12 @@ export const RegisterUserModal: React.FC = () => {
     try {
       const newUser = await registerUser({
         name: name.trim(),
-        email: email.trim(),
-        id: customId.trim() || undefined
+        email: email.trim()
       });
 
-      setSuccessMessage(`¡Usuario ${newUser.name} registrado con ID '${newUser.id}'! Sesión activa actualizada.`);
+      setSuccessMessage(`¡Usuario ${newUser.name} registrado exitosamente! Sesión activa actualizada.`);
       setName('');
       setEmail('');
-      setCustomId('');
 
       setTimeout(() => {
         setIsRegisterModalOpen(false);
@@ -117,22 +114,6 @@ export const RegisterUserModal: React.FC = () => {
                 required
                 disabled={isSubmitting}
               />
-            </div>
-
-            <div className="cm-form-group">
-              <label className="cm-form-label" htmlFor="reg-id">ID de usuario (Opcional)</label>
-              <input
-                id="reg-id"
-                type="text"
-                className="cm-form-input"
-                placeholder="Ej. u006 (se genera automático si se omite)"
-                value={customId}
-                onChange={(e) => setCustomId(e.target.value)}
-                disabled={isSubmitting}
-              />
-              <span className="cm-form-hint">
-                Se indexará en tiempo O(1) en la Tabla Hash y se añadirá como vértice al Grafo Bipartito.
-              </span>
             </div>
           </div>
 
